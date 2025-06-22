@@ -1,64 +1,46 @@
-program Test4;
+program TestFuncionesProcedimientos;
 
-const
-    GLOB1 = 42;
-    GLOB2 = 7;
-
-var
-    x, y    : INTEGER;
-    z, w    : REAL;
-
-procedure NoParamProc;
-
-var
-    a : INTEGER;
+function fun1 ( a:INTEGER ; b:REAL ) : INTEGER
 begin
-    a := GLOB1 div GLOB2;
-    writeln('NoParamProc a: ', a);
+    proc2;
+end;
+
+function fun2() : REAL
+begin
+    proc1(1.3 , -4);
+end;
+
+procedure proc1 ( c:REAL ; d:INTEGER )
+begin
+    valor := fun1(1 , 1.0);
+end;
+
+
+procedure proc2
+begin
+    valor := fun2;
 end;
 
 const
-    GLOB3 = 100;
-    GLOB4 = 3;
+   MAX_USERS = 100;
+   PI        = 3.1416;
+   MESSAGE   = 'Bienvenido al sistema';
 
-function NestedCalls(p: INTEGER): INTEGER;
-
-begin
-    t := GLOB1 mod GLOB2;              { expresión mod con paréntesis omitidos }
-    t := p * (GLOB1 mod GLOB2);        { mod dentro de paréntesis }
-    NestedCalls := t + NestedCalls(p div 2);
-end;
-
-function RealMath(r: REAL): REAL;
 var
-    r2, r3 : REAL;
-begin
-    r2 := (r + 1.0) * 2.5;             { literales reales permitidos como factor }
-    r3 := r2;                          { evitamos división real }
-    RealMath := r3 - r;                { resta real }
-end;
-
-procedure DuplicateNames;
-var
-    x : INTEGER;                       { mismo nombre parámetro y local }
-    y : REAL;
-begin
-    x := x + GLOB2;                    { x local sombreando parámetro }
-    y := RealMath(x);                  { llamada a función real en proc }
-    writeln('Duplicate x: ', x);
-    writeln('Calc y: ', y);
-end;
+   edad, contador : INTEGER;
+   salario        : REAL;
 
 begin
-    NoParamProc();
-    writeln('After NoParamProc');
+   edad     := 25;
+   contador := 1;
+   salario  := 1500.50;
 
-    z := NestedCalls(GLOB1);
-    writeln('NestedCalls result: ', z);
+   writeln('Máximo de usuarios : ', MAX_USERS);
+   writeln('Valor de PI        : ', PI);
+   writeln('Mensaje            : ', MESSAGE);
+   writeln;
 
-    w := RealMath(z);
-    writeln('RealMath result: ', w);
-
-    DuplicateNames(5);
-    writeln('End ofTest4');
+   writeln('Edad               : ', edad);
+   writeln('Contador           : ', contador);
+   writeln('Salario            : $', salario);
 end.

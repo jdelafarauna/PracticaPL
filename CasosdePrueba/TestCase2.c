@@ -1,46 +1,34 @@
 #include <stdio.h>
 
+#define MAX_USERS 100
+#define PI 3.1416
+#define MESSAGE "Bienvenido al sistema"
 
-void NoParamProc() {
-    int a;
-    a = (GLOB1 / GLOB2);
-    writeln('NoParamProc a: ');
+int fun1(int a, float b) {
+    proc2();
 }
-
-int NestedCalls(int p) {
-    t = (GLOB1 % GLOB2);
-    t = (p * ((GLOB1 % GLOB2)));
-    return (t + NestedCalls((p / 2)));
+float fun2(void) {
+    proc1(1.3);
 }
-float RealMath(float r) {
-    float r2,r3;
-    r2 = (((r + 1.0)) * 2.5);
-    r3 = r2;
-    return (r3 - r);
+void proc1(float c, int d) {
+    valor = fun1(1);
 }
-void DuplicateNames() {
-    int x;
-    float y;
-    x = (x + GLOB2);
-    y = RealMath(x);
-    writeln('Duplicate x: ');
-    writeln('Calc y: ');
+void proc2(void) {
+    valor = fun2;
 }
-#define GLOB1 42
-#define GLOB2 7
-#define GLOB3 100
-#define GLOB4 3
 
 void main(void) {
-    int x,y;
-    float z,w;
-    NoParamProc();
-    writeln('After NoParamProc');
-    z = NestedCalls(GLOB1);
-    writeln('NestedCalls result: ');
-    w = RealMath(z);
-    writeln('RealMath result: ');
-    DuplicateNames(5);
-    writeln('End ofTest4');
+    int edad,contador;
+    float salario;
+    edad = 25;
+    contador = 1;
+    salario = 1500.50;
+    writeln("Máximo de usuarios : ");
+    writeln("Valor de PI        : ");
+    writeln("Mensaje            : ");
+    writeln();
+    writeln("Edad               : ");
+    writeln("Contador           : ");
+    writeln("Salario            : $");
     return 0;
 }

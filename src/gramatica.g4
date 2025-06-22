@@ -3,36 +3,47 @@ grammar gramatica;
 @members {
     java.util.List<String> mainLocalVars = new java.util.ArrayList<>();
     java.util.List<String> globalConstDefs = new java.util.ArrayList<>();
-
+    java.util.List<String> functionDefs = new java.util.ArrayList<>();
 
     String currentFunction = null;
+    StringBuilder currentFunctionBuilder = null;
     int indentLevel = 0;
     java.util.Map<String, String> symbolTable = new java.util.HashMap<>();
     boolean isGlobalContext = true;
 
     void println(String line) {
-        for (int i = 0; i < indentLevel; i++) System.out.print("    ");
-        System.out.println(line);
+        if (currentFunctionBuilder != null) {
+            for (int i = 0; i < indentLevel; i++) currentFunctionBuilder.append("    ");
+            currentFunctionBuilder.append(line).append("\n");
+        } else {
+            for (int i = 0; i < indentLevel; i++) System.out.print("    ");
+            System.out.println(line);
+        }
     }
 
     void print(String line) {
-        for (int i = 0; i < indentLevel; i++) System.out.print("    ");
-        System.out.print(line);
+        if (currentFunctionBuilder != null) {
+            for (int i = 0; i < indentLevel; i++) currentFunctionBuilder.append("    ");
+            currentFunctionBuilder.append(line);
+        } else {
+            for (int i = 0; i < indentLevel; i++) System.out.print("    ");
+            System.out.print(line);
+        }
     }
+
     String toCRelOp(String op) {
         if (op.equals("="))  return "==";
         if (op.equals("<>")) return "!=";
         return op;
     }
+
     String toCArithOp(String op) {
         if (op.equals("div")) return "/";
         if (op.equals("mod")) return "%";
         return op;
     }
-
-
-
 }
+
 
 
 /* ───────────────────  PROGRAMA PRINCIPAL ─────────────────── */
@@ -44,9 +55,15 @@ prg
   }
   dcllist
   {
-    // Ahora ya se han recopilado todas las constantes
+    // Imprimir constantes después de procesar todas las declaraciones
     for (String def : globalConstDefs) {
         System.out.println(def);
+    }
+    System.out.println();
+
+    // Imprimir funciones/procedimientos después de que se hayan reconocido
+    for (String f : functionDefs) {
+        System.out.print(f);
     }
 
     println("");
@@ -75,7 +92,7 @@ dcllistPrima : dcl dcllistPrima | ;
 dcl : defcte | defvar | defproc | deffun ;
 
 /* constantes */
-defcte : 'const' ctelist { println(""); };
+defcte : 'const' ctelist ;
 
 ctelist
     : ID '=' simpvalue ';' {
@@ -159,22 +176,43 @@ varlistPrima : ',' ID varlistPrima | ;
 /* procedimientos y funciones */
 defproc
 returns [String fname]
-    : 'procedure' ID { $fname = $ID.text; isGlobalContext = false; }
-      fp=formal_paramlist
-      ';'
-      { print("void " + $fname); print("(" + $fp.text + ") {"); System.out.println(); indentLevel++; }
-      blq
-      ';'
-      { indentLevel--; println("}"); isGlobalContext = true; }
+    : 'procedure' ID {
+        $fname = $ID.text;
+        isGlobalContext = false;
+        currentFunction = $fname;
+    }
+    fp=formal_paramlist //';'
+    {
+        currentFunctionBuilder = new StringBuilder();
+        currentFunctionBuilder.append("void ").append($fname)
+                              .append("(").append($fp.text).append(") {\n");
+        indentLevel++;
+    }
+    blq
+    ';'
+    {
+        indentLevel--;
+        currentFunctionBuilder.append("}\n");
+        functionDefs.add(currentFunctionBuilder.toString());
+        currentFunctionBuilder = null;
+        currentFunction = null;
+        isGlobalContext = true;
+    }
 ;
 
+
+
+
 deffun
-    : 'function' ID fname=formal_paramlist ':' rtype=tbas ';'
+    : 'function' ID fname=formal_paramlist ':' rtype=tbas //';'
       {
         currentFunction = $ID.text;
         isGlobalContext = false;
-        print($rtype.val + " " + currentFunction + "(" + $fname.text + ") {");
-        System.out.println();
+        currentFunctionBuilder = new StringBuilder();
+        currentFunctionBuilder.append($rtype.val)
+                              .append(" ")
+                              .append(currentFunction)
+                              .append("(").append($fname.text).append(") {\n");
         indentLevel++;
         symbolTable.put(currentFunction, $rtype.val);
       }
@@ -182,24 +220,37 @@ deffun
       ';'
       {
         indentLevel--;
-        println("}");
+        currentFunctionBuilder.append("}\n");
+        functionDefs.add(currentFunctionBuilder.toString());
+        currentFunctionBuilder = null;
         currentFunction = null;
         isGlobalContext = true;
       }
 ;
 
+
+
 /* lista de parámetros formales */
 formal_paramlist returns [String text = ""]
-    : '(' params+=formal_param (';' params+=formal_param)* ')' {
+    : '(' ')' {
+        $text = "void";
+    }
+    | '(' params+=formal_param (';' params+=formal_param)* ')' {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < $params.size(); i++) {
             if (i > 0) builder.append(", ");
             builder.append($params.get(i).text);
         }
         $text = builder.toString();
-      }
-    | { $text = ""; }
+    }
+    | {
+        $text = "void";
+    }
     ;
+
+
+
+
 
 formal_param returns [String text]
     : vl=varlist ':' tb=tbas {
@@ -387,17 +438,29 @@ subparamlist returns [String text = ""]
     |                         { $text = ""; }
     ;
 
+
 explist returns [String text = ""]
     : a=exp { $text = $a.text; } explistPrima[$text]
     ;
+
 explistPrima[String prev] returns [String text]
     : ',' b=exp r=explistPrima[$prev + ", " + $b.text] { $text = $r.text; }
     | { $text = $prev; }
     ;
 
+
 /* llamada a procedimiento */
 proc_call
-    : ID s=subparamlist {
+    : 'writeln' s=subparamlist {
+        if ($s.text.isEmpty()) {
+            println("writeln();");
+        } else {
+            // Cambiar comillas simples por dobles en el primer parámetro si es literal
+            String translated = $s.text.replaceAll("'([^']*)'", "\"$1\"");
+            println("writeln(" + translated + ");");
+        }
+    }
+    | ID s=subparamlist {
         if ($s.text.isEmpty()) {
             println($ID.text + "();");
         } else {
@@ -405,6 +468,9 @@ proc_call
         }
     }
     ;
+
+
+
 
 
 
