@@ -440,13 +440,18 @@ subparamlist returns [String text = ""]
 
 
 explist returns [String text = ""]
-    : a=exp { $text = $a.text; } explistPrima[$text]
+    : a=exp rest=explistTail {
+        $text = $a.text + $rest.text;
+    }
     ;
 
-explistPrima[String prev] returns [String text]
-    : ',' b=exp r=explistPrima[$prev + ", " + $b.text] { $text = $r.text; }
-    | { $text = $prev; }
+explistTail returns [String text = ""]
+    : ',' b=exp r=explistTail {
+        $text = ", " + $b.text + $r.text;
+    }
+    | { $text = ""; }
     ;
+
 
 
 /* llamada a procedimiento */

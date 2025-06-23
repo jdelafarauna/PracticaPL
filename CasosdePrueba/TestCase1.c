@@ -4,20 +4,19 @@
 #define PI 3.1416
 #define MESSAGE "Bienvenido al sistema"
 
-int edad,contador;
-float salario;
 
-
-int main() {
+void main(void) {
+    int edad,contador;
+    float salario;
     edad = 25;
     contador = 1;
     salario = 1500.50;
-    writeln('M�ximo de usuarios : ');
-    writeln('Valor de PI        : ');
-    writeln('Mensaje            : ');
+    writeln("Máximo de usuarios : ", MAX_USERS);
+    writeln("Valor de PI        : ", PI);
+    writeln("Mensaje            : ", MESSAGE);
     writeln();
-    writeln('Edad               : ');
-    writeln('Contador           : ');
-    writeln('Salario            : $');
+    writeln("Edad               : ", edad);
+    writeln("Contador           : ", contador);
+    writeln("Salario            : $", salario);
     return 0;
 }

@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-int i,total;
 
 
-int main() {
+void main(void) {
+    int i,total;
     total = 0;
     for (i = 1; i <= 5; i++) {
         total = (total + i);

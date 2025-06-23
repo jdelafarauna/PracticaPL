@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-int x,y,max;
 
 
-int main() {
+void main(void) {
+    int x,y,max;
     x = 15;
     y = 27;
     if (x > y) {
